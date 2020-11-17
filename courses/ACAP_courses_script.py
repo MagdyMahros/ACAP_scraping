@@ -173,6 +173,26 @@ for each_url in course_links_file:
                   ' face to face: ' + course_data['Face_to_Face'] + ' blended: ' + course_data['Blended'] +
                   ' distance: ' + course_data['Distance'])
             print('CITY: ', actual_cities)
+    # FEES
+    fees_title = soup.find('label', text=re.compile('Fees', re.IGNORECASE))
+    if fees_title:
+        fees_temp_list = []
+        fees_p = fees_title.find_next_sibling('p')
+        if fees_p:
+            fees_span_list = fees_p.find_all('span')
+            for span in fees_span_list:
+                fees_list = re.findall(r'\d+', span.get_text())
+                if fees_list is not None:
+                    if len(fees_list) == 2:
+                        full_fee = int(fees_list[0]) * int(fees_list[1])
+                        course_data['Int_Fees'] = full_fee
+                    elif len(fees_list) == 1:
+                        fees_temp_list.append(fees_list[0])
+                if len(fees_temp_list) == 2:
+                    full_fee = int(fees_temp_list[0]) * int(fees_temp_list[1])
+                    course_data['Int_Fees'] = full_fee
+            print('INT FEE: ', course_data['Int_Fees'])
+
 
 
 
