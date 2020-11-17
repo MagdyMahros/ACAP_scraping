@@ -41,13 +41,9 @@ course_data = {'Level_Code': '', 'University': 'Australian College of Applied Ps
                'Availability': 'A', 'Description': '','Career_Outcomes': '', 'Online': '', 'Offline': '', 'Distance': '',
                'Face_to_Face': '', 'Blended': '', 'Remarks': ''}
 
-possible_cities = {'rockhampton': 'Rockhampton', 'cairns': 'Cairns', 'bundaberg': 'Bundaberg',
-                   'townsville': 'Townsville', 'canberra': 'Canberra', 'paddington': 'Paddington',
-                   'online': 'Online', 'gladstone': 'Gladstone', 'mackay': 'Mackay', 'mixed': 'Online',
-                   'yeppoon': 'Yeppoon', 'brisbane': 'Brisbane', 'sydney': 'Sydney', 'queensland': 'Queensland',
-                   'melbourne': 'Melbourne', 'albany': 'Albany', 'perth': 'Perth', 'adelaide': 'Adelaide',
-                   'noosa': 'Noosa', 'emerald': 'Emerald', 'hawthorn': 'Hawthorn', 'wantirna': 'Wantirna',
-                   'prahran': 'Prahran', 'kensington': 'Kensington'}
+possible_cities = {
+                   'online': 'Online', 'mixed': 'Online', 'brisbane': 'Brisbane', 'sydney': 'Sydney',
+                   'melbourne': 'Melbourne', 'perth': 'Perth'}
 
 possible_languages = {'Japanese': 'Japanese', 'French': 'French', 'Italian': 'Italian', 'Korean': 'Korean',
                       'Indonesian': 'Indonesian', 'Chinese': 'Chinese', 'Spanish': 'Spanish'}
@@ -145,6 +141,7 @@ for each_url in course_links_file:
             deli_text = deli_p.get_text().lower()
             if 'online' in deli_text:
                 course_data['Online'] = 'yes'
+                actual_cities.append('online')
             else:
                 course_data['Online'] = 'no'
             if 'face-to-face' in deli_text:
@@ -192,6 +189,37 @@ for each_url in course_links_file:
                     full_fee = int(fees_temp_list[0]) * int(fees_temp_list[1])
                     course_data['Int_Fees'] = full_fee
             print('INT FEE: ', course_data['Int_Fees'])
+
+    # duplicating entries with multiple cities for each city
+    for i in actual_cities:
+        course_data['City'] = possible_cities[i]
+        course_data_all.append(copy.deepcopy(course_data))
+    del actual_cities
+
+    # TABULATE THE DATA
+    desired_order_list = ['Level_Code', 'University', 'City', 'Course', 'Faculty', 'Int_Fees', 'Local_Fees',
+                          'Currency', 'Currency_Time', 'Duration', 'Duration_Time', 'Full_Time', 'Part_Time',
+                          'Prerequisite_1', 'Prerequisite_2', 'Prerequisite_3', 'Prerequisite_1_grade',
+                          'Prerequisite_2_grade', 'Prerequisite_3_grade', 'Website', 'Course_Lang', 'Availability',
+                          'Description', 'Career_Outcomes', 'Country', 'Online', 'Offline', 'Distance',
+                          'Face_to_Face', 'Blended', 'Remarks']
+
+    course_dict_keys = set().union(*(d.keys() for d in course_data_all))
+
+    with open(csv_file, 'w', encoding='utf-8', newline='') as output_file:
+        dict_writer = csv.DictWriter(output_file, course_dict_keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(course_data_all)
+
+    with open(csv_file, 'r', encoding='utf-8') as infile, open('ACAP_courses_ordered.csv', 'w', encoding='utf-8',
+                                                               newline='') as outfile:
+        writer = csv.DictWriter(outfile, fieldnames=desired_order_list)
+        # reorder the header first
+        writer.writeheader()
+        for row in csv.DictReader(infile):
+            # writes the reordered rows to the new file
+            writer.writerow(row)
+
 
 
 
