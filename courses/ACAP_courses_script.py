@@ -35,10 +35,10 @@ csv_file = csv_file_path.__str__() + '/ACAP_courses.csv'
 
 course_data = {'Level_Code': '', 'University': 'Australian College of Applied Psychology', 'City': '',
                'Country': 'Australia', 'Course': '', 'Int_Fees': '', 'Local_Fees': '', 'Currency': 'AUD',
-               'Currency_Time': 'year','Duration': '', 'Duration_Time': '', 'Full_Time': '', 'Part_Time': '',
+               'Currency_Time': 'year', 'Duration': '', 'Duration_Time': '', 'Full_Time': '', 'Part_Time': '',
                'Prerequisite_1': '', 'Prerequisite_2': 'IELTS', 'Prerequisite_3': '', 'Prerequisite_1_grade': '',
                'Prerequisite_2_grade': '6.5', 'Prerequisite_3_grade': '', 'Website': '', 'Course_Lang': '',
-               'Availability': '', 'Description': '','Career_Outcomes': '', 'Online': '', 'Offline': '', 'Distance': '',
+               'Availability': 'A', 'Description': '','Career_Outcomes': '', 'Online': '', 'Offline': '', 'Distance': '',
                'Face_to_Face': '', 'Blended': '', 'Remarks': ''}
 
 possible_cities = {'rockhampton': 'Rockhampton', 'cairns': 'Cairns', 'bundaberg': 'Bundaberg',
@@ -136,3 +136,43 @@ for each_url in course_links_file:
                 course_data['Duration_Time'] = duration_l[1]
                 print('COURSE DURATION: ', str(duration_l[0]) + ' / ' + duration_l[1])
             print('FULL-TIME/PART-TIME: ', course_data['Full_Time'] + ' / ' + course_data['Part_Time'])
+
+    # DELIVERY / CITY
+    deli_title = soup.find('label', text=re.compile('Study Modes', re.IGNORECASE))
+    if deli_title:
+        deli_p = deli_title.find_next_sibling('p')
+        if deli_p:
+            deli_text = deli_p.get_text().lower()
+            if 'online' in deli_text:
+                course_data['Online'] = 'yes'
+            else:
+                course_data['Online'] = 'no'
+            if 'face-to-face' in deli_text:
+                course_data['Face_to_Face'] = 'yes'
+            else:
+                course_data['Face_to_Face'] = 'no'
+            if 'on campus' in deli_text or 'on-campus' in deli_text:
+                course_data['Face_to_Face'] = 'yes'
+                course_data['Offline'] = 'yes'
+            else:
+                course_data['Face_to_Face'] = 'no'
+                course_data['Offline'] = 'no'
+            if 'blended' in deli_text:
+                course_data['Blended'] = 'yes'
+            else:
+                course_data['Blended'] = 'no'
+            if 'perth' in deli_text:
+                actual_cities.append('perth')
+            if 'melbourne' in deli_text:
+                actual_cities.append('melbourne')
+            if 'brisbane' in deli_text:
+                actual_cities.append('brisbane')
+            if 'sydney' in deli_text:
+                actual_cities.append('sydney')
+            print('DELIVERY: online: ' + course_data['Online'] + ' offline: ' + course_data['Offline'] +
+                  ' face to face: ' + course_data['Face_to_Face'] + ' blended: ' + course_data['Blended'] +
+                  ' distance: ' + course_data['Distance'])
+            print('CITY: ', actual_cities)
+
+
+
